@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171a2b">
+<meta name="color-scheme" content="dark">
+<title>Roue 2TNX Pro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png">
+<style>
+:root{
+  --bg:#171a2b; --panel:#242942; --panel2:#1e2338; --line:#465074;
+  --text:#f8f9ff; --muted:#aeb6d2; --gold:#ffd45c; --danger:#ff5a65; --ok:#65e3b8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:
+radial-gradient(circle at 50% -10%,#3c4778 0,#22273f 35%,#151827 72%);color:var(--text)}
+body{padding:14px}
+.app{max-width:1100px;margin:auto}
+header{text-align:center;margin-bottom:8px}
+h1{margin:6px 0 2px;font-size:clamp(26px,5vw,44px);letter-spacing:.3px}
+.tagline{color:var(--muted);font-size:14px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;align-items:start}
+.card{background:rgba(36,41,66,.88);border:1px solid rgba(96,108,153,.45);border-radius:20px;box-shadow:0 14px 35px rgba(0,0,0,.22)}
+.main-card{padding:12px}
+.side{padding:14px;position:sticky;top:12px}
+.wheel-wrap{position:relative;width:min(100%,700px);aspect-ratio:1;margin:auto;filter:drop-shadow(0 17px 28px rgba(0,0,0,.34))}
+#wheel{width:100%;height:100%;display:block;transition:transform 5.4s cubic-bezier(.10,.72,.15,1);will-change:transform}
+.pointer{position:absolute;z-index:5;left:50%;top:1.2%;transform:translateX(-50%);width:0;height:0;
+border-left:25px solid transparent;border-right:25px solid transparent;border-bottom:60px solid #ff4250;filter:drop-shadow(0 4px 3px rgba(0,0,0,.42))}
+.pointer:after{content:"";position:absolute;left:-17px;top:8px;border-left:17px solid transparent;border-right:17px solid transparent;border-bottom:40px solid #ff868e}
+.spin-area{text-align:center;margin-top:4px}
+button{border:0;border-radius:14px;padding:12px 15px;font-weight:800;font-size:15px;cursor:pointer;transition:.15s transform,.15s opacity}
+button:hover{transform:translateY(-1px)} button:active{transform:translateY(1px)} button:disabled{opacity:.45;cursor:default;transform:none}
+#spin{font-size:18px;padding:15px 24px;min-width:245px;background:linear-gradient(#ffe47e,#f5b91f);color:#302000;box-shadow:0 5px 0 #9f7000}
+.actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+.secondary{background:#343b5b;color:#fff;border:1px solid #4c567d}
+.danger{background:#5b3038;color:#fff;border:1px solid #7b434d}
+.result{display:none;margin:14px auto 0;max-width:620px;align-items:center;gap:14px;text-align:left;padding:13px;background:#1b2035;border:1px solid #485174;border-radius:18px}
+.result.show{display:flex}.result img{width:78px;height:78px;border-radius:50%;border:4px solid #fff}.result-title{font-size:21px;font-weight:900}.result-sub{color:var(--muted);font-size:13px;margin-top:3px}
+.section-title{font-weight:900;margin:2px 0 10px}
+.settings{display:grid;gap:10px}
+.switchrow{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#1c2136;padding:10px;border-radius:12px}
+.switchrow label{font-size:14px}
+input[type=checkbox]{width:22px;height:22px;accent-color:#ffd45c}
+select,input[type=text]{background:#15192a;color:#fff;border:1px solid #485174;border-radius:10px;padding:9px;width:100%}
+.players{display:grid;gap:7px;margin-top:8px}
+.player{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;background:#1c2136;padding:6px;border-radius:12px}
+.player img{width:42px;height:42px;border-radius:50%}.player input{min-width:0}.player .active{width:21px;height:21px}
+.history{margin-top:14px}
+.history-list{display:grid;gap:7px;max-height:255px;overflow:auto}
+.history-item{display:grid;grid-template-columns:36px 1fr auto;gap:9px;align-items:center;background:#1c2136;border-radius:11px;padding:7px}
+.history-item img{width:36px;height:36px;border-radius:50%}
+.history-item small{color:var(--muted)}
+.badge{font-size:11px;padding:4px 7px;border-radius:999px;background:#333a59;color:#dfe4ff}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:12px}
+.footer-note{font-size:12px;color:#929bb9;text-align:center;margin:12px 4px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);opacity:0;background:#0e1220;border:1px solid #4a557e;color:#fff;padding:11px 15px;border-radius:12px;transition:.25s;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
+.top-actions{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:7px 0 2px}
+.top-actions button{padding:8px 11px;font-size:13px}
+@media(max-width:840px){.layout{grid-template-columns:1fr}.side{position:static}.wheel-wrap{width:min(94vw,650px)}}
+@media(max-width:480px){body{padding:8px}.main-card{padding:7px}.side{padding:11px}.pointer{border-left-width:20px;border-right-width:20px;border-bottom-width:50px}.result img{width:64px;height:64px}.result-title{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>🎡 Roue 2TNX Pro</h1>
+  <div class="tagline">7 personnages • tirage aléatoire • partage Discord • mode élimination</div>
+</header>
+
+<div class="layout">
+  <section class="card main-card">
+    <div class="top-actions">
+      <button class="secondary" id="fullscreenBtn">⛶ Plein écran</button>
+      <button class="secondary" id="installBtn" style="display:none">＋ Installer l’app</button>
+    </div>
+
+    <div class="wheel-wrap">
+      <canvas id="wheel" width="1200" height="1200" aria-label="Roue à tourner"></canvas>
+      <div class="pointer" aria-hidden="true"></div>
+    </div>
+
+    <div class="spin-area">
+      <button id="spin">TOURNER LA ROUE</button>
+      <div class="actions">
+        <button id="copy" class="secondary" disabled>Copier pour Discord</button>
+        <button id="share" class="secondary" disabled>Partager le résultat</button>
+        <button id="imageBtn" class="secondary" disabled>Créer l’image gagnant</button>
+      </div>
+    </div>
+
+    <div class="result" id="result">
+      <img id="winnerImg" alt="">
+      <div>
+        <div class="result-title" id="winnerText">Résultat</div>
+        <div class="result-sub" id="winnerSub"></div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="card side">
+    <div class="section-title">Réglages</div>
+    <div class="settings">
+      <div class="switchrow">
+        <label for="noRepeat">Mode élimination<br><small style="color:var(--muted)">Le gagnant est retiré du tirage suivant.</small></label>
+        <input id="noRepeat" type="checkbox">
+      </div>
+      <div class="switchrow">
+        <label for="sound">Sons de roue</label>
+        <input id="sound" type="checkbox" checked>
+      </div>
+      <div class="switchrow">
+        <label for="confettiToggle">Confettis au résultat</label>
+        <input id="confettiToggle" type="checkbox" checked>
+      </div>
+      <div>
+        <label for="turns" style="display:block;font-size:13px;color:var(--muted);margin-bottom:5px">Nombre de tours visuels</label>
+        <select id="turns">
+          <option value="5">5 tours</option>
+          <option value="7" selected>7 tours</option>
+          <option value="10">10 tours</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:16px">Personnages</div>
+    <div class="players" id="players"></div>
+    <div class="actions" style="justify-content:flex-start">
+      <button class="secondary" id="allBtn">Tous actifs</button>
+      <button class="secondary" id="resetNamesBtn">Noms par défaut</button>
+    </div>
+
+    <div class="history">
+      <div class="section-title">Historique des tirages</div>
+      <div class="history-list" id="historyList"></div>
+      <div class="actions" style="justify-content:flex-start">
+        <button class="danger" id="clearHistory">Effacer l’historique</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="footer-note">Fonctionne hors connexion après installation. Le tirage est effectué localement dans le navigateur.</div>
+</div>
+<canvas id="confettiCanvas" class="confetti"></canvas>
+<div id="toast" class="toast"></div>
+
+<script>
+const N=7;
+const canvas=document.getElementById('wheel'),ctx=canvas.getContext('2d');
+const spinBtn=document.getElementById('spin'),copyBtn=document.getElementById('copy'),shareBtn=document.getElementById('share'),imageBtn=document.getElementById('imageBtn');
+const result=document.getElementById('result'),winnerImg=document.getElementById('winnerImg'),winnerText=document.getElementById('winnerText'),winnerSub=document.getElementById('winnerSub');
+const playersEl=document.getElementById('players'),historyList=document.getElementById('historyList');
+const noRepeat=document.getElementById('noRepeat'),soundToggle=document.getElementById('sound'),confettiToggle=document.getElementById('confettiToggle'),turnsSel=document.getElementById('turns');
+const toast=document.getElementById('toast');
+const colors=['#FFD43B','#45A9FF','#FF58A8','#8D5CFF','#21D7C4','#FF8A28','#A44BFF'];
+const imgs=[];
+const defaults=[
+  "Souriant / Улыбающийся / Smiling",
+  "Désolé / Извиняющийся / Sorry",
+  "Amoureux / Влюблённый / In love",
+  "Choqué / Шокированный / Shocked",
+  "Frimeur / Хвастун / Show-off",
+  "Pleurnichard / Плакса / Crybaby",
+  "Timide / Застенчивый / Shy"
+];
+const legacyDefaults=Array.from({length:N},(_,i)=>`Personnage ${i+1}`);
+let storedNames=JSON.parse(localStorage.getItem('r2_names')||'null');
+let names=(!storedNames || (
+  Array.isArray(storedNames) &&
+  storedNames.length===N &&
+  storedNames.every((v,i)=>v===legacyDefaults[i])
+)) ? defaults.slice() : storedNames;
+let active=JSON.parse(localStorage.getItem('r2_active')||'null')||Array(N).fill(true);
+let history=JSON.parse(localStorage.getItem('r2_history')||'[]');
+let currentRotation=0,winnerIndex=null,spinning=false,lastTargetIndex=0;
+let audioCtx=null,tickTimer=null,deferredPrompt=null;
+// Enregistrer les nouveaux noms par défaut après migration d'une ancienne version.
+localStorage.setItem('r2_names',JSON.stringify(names));
+
+function save(){localStorage.setItem('r2_names',JSON.stringify(names));localStorage.setItem('r2_active',JSON.stringify(active));localStorage.setItem('r2_history',JSON.stringify(history));}
+function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1600)}
+function loadImages(){return Promise.all(Array.from({length:N},(_,i)=>new Promise(resolve=>{const im=new Image();im.onload=()=>{imgs[i]=im;resolve()};im.src=`assets/avatar_${i+1}.png`})))}
+
+function drawWheel(){
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2,R=535,step=Math.PI*2/N,start=-Math.PI/2-step/2;
+  ctx.clearRect(0,0,W,H);
+  const grd=ctx.createRadialGradient(cx,cy,R*.78,cx,cy,R+46);grd.addColorStop(0,'#d68d00');grd.addColorStop(.6,'#ffd858');grd.addColorStop(1,'#fff2a1');
+  ctx.beginPath();ctx.arc(cx,cy,R+45,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,R+17,0,Math.PI*2);ctx.fillStyle='#4b335f';ctx.fill();
+
+  for(let i=0;i<N;i++){
+    const a0=start+i*step,a1=a0+step,mid=(a0+a1)/2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a0,a1);ctx.closePath();
+    ctx.fillStyle=active[i]?colors[i]:'#4a4d5b';ctx.fill();
+    ctx.lineWidth=7;ctx.strokeStyle='rgba(35,25,70,.75)';ctx.stroke();
+
+    const rr=R*.67,x=cx+Math.cos(mid)*rr,y=cy+Math.sin(mid)*rr,s=238;
+    ctx.save();ctx.translate(x,y);ctx.rotate(mid+Math.PI/2);
+    ctx.globalAlpha=active[i]?1:.32;
+    ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=18;ctx.shadowOffsetY=7;
+    if(imgs[i])ctx.drawImage(imgs[i],-s/2,-s/2,s,s);
+    ctx.restore();
+
+    if(!active[i]){
+      ctx.save();ctx.translate(x,y);ctx.rotate(mid+Math.PI/2);ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=13;
+      ctx.beginPath();ctx.moveTo(-70,-70);ctx.lineTo(70,70);ctx.moveTo(70,-70);ctx.lineTo(-70,70);ctx.stroke();ctx.restore();
+    }
+  }
+
+  ctx.beginPath();ctx.arc(cx,cy,132,0,Math.PI*2);ctx.fillStyle='#f5b927';ctx.fill();ctx.lineWidth=12;ctx.strokeStyle='#8f5600';ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,91,0,Math.PI*2);ctx.fillStyle='#fff0a7';ctx.fill();
+  ctx.font='800 78px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#9a5c00';ctx.fillText('★',cx,cy+4);
+
+  // small lights around rim
+  for(let k=0;k<22;k++){
+    const a=2*Math.PI*k/22,r=R+31;
+    const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;
+    ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.88)';ctx.fill();
+  }
+}
+function cryptoChoice(arr){const a=new Uint32Array(1);crypto.getRandomValues(a);return arr[a[0]%arr.length]}
+function available(){return active.map((v,i)=>v?i:null).filter(v=>v!==null)}
+
+function ensureAudio(){
+  if(!soundToggle.checked)return null;
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  return audioCtx;
+}
+function beep(freq=500,dur=.025,gain=.025){
+  const ac=ensureAudio();if(!ac)return;
+  const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=freq;o.type='square';g.gain.value=gain;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+dur);
+}
+function startTicks(){
+  if(!soundToggle.checked)return;
+  let delay=85,count=0;
+  const tick=()=>{if(!spinning)return;beep(430+(count%2)*70,.018,.02);count++;delay=Math.min(360,delay*1.055);tickTimer=setTimeout(tick,delay)};
+  tick();
+}
+function winChime(){
+  if(!soundToggle.checked)return;
+  setTimeout(()=>beep(660,.10,.05),0);setTimeout(()=>beep(880,.12,.05),120);setTimeout(()=>beep(1120,.20,.045),260);
+}
+function fireConfetti(){
+  if(!confettiToggle.checked)return;
+  const c=document.getElementById('confettiCanvas'),x=c.getContext('2d');
+  c.width=innerWidth;c.height=innerHeight;
+  const pieces=Array.from({length:120},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.3,vx:(Math.random()-.5)*5,vy:3+Math.random()*6,r:3+Math.random()*6,a:Math.random()*Math.PI*2,va:(Math.random()-.5)*.25,col:colors[Math.floor(Math.random()*colors.length)]}));
+  let frame=0;
+  function anim(){x.clearRect(0,0,c.width,c.height);for(const p of pieces){p.x+=p.vx;p.y+=p.vy;p.a+=p.va;p.vy+=.035;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.col;x.fillRect(-p.r,-p.r*.55,p.r*2,p.r*1.1);x.restore()}frame++;if(frame<180)requestAnimationFrame(anim);else x.clearRect(0,0,c.width,c.height)}
+  anim();
+}
+
+function spin(){
+  if(spinning)return;
+  const pool=available();
+  if(pool.length===0){active=Array(N).fill(true);save();buildPlayers();drawWheel();showToast('Tous les personnages ont été réactivés.');return}
+  ensureAudio();
+  winnerIndex=cryptoChoice(pool);
+  spinning=true;spinBtn.disabled=true;copyBtn.disabled=true;shareBtn.disabled=true;imageBtn.disabled=true;result.classList.remove('show');
+  const step=360/N,target=-winnerIndex*step,normalized=((currentRotation%360)+360)%360,turns=Number(turnsSel.value)||7;
+  currentRotation+=360*turns+((target-normalized+360)%360);
+  canvas.style.transform=`rotate(${currentRotation}deg)`;
+  startTicks();
+  setTimeout(()=>{
+    spinning=false;clearTimeout(tickTimer);spinBtn.disabled=false;copyBtn.disabled=false;shareBtn.disabled=false;imageBtn.disabled=false;
+    winnerImg.src=`assets/avatar_${winnerIndex+1}.png`;
+    winnerText.textContent=`La roue a choisi : ${names[winnerIndex]}`;
+    const now=new Date();
+    winnerSub.textContent=now.toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'});
+    result.classList.add('show');
+    history.unshift({i:winnerIndex,name:names[winnerIndex],ts:Date.now()});history=history.slice(0,50);
+    if(noRepeat.checked)active[winnerIndex]=false;
+    save();buildPlayers();renderHistory();drawWheel();winChime();fireConfetti();
+    if(navigator.vibrate)navigator.vibrate([80,55,130]);
+  },5450);
+}
+function discordText(){return winnerIndex===null?'':`🎡 **ROUE 2TNX**\nLa roue a parlé : **${names[winnerIndex]}** !`}
+async function copyResult(){
+  const t=discordText();if(!t)return;
+  try{await navigator.clipboard.writeText(t);showToast('Message Discord copié.')}catch{window.prompt('Copie ce message :',t)}
+}
+function makeWinnerCard(){
+  if(winnerIndex===null)return null;
+  const c=document.createElement('canvas');c.width=1200;c.height=675;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,1200,675);g.addColorStop(0,'#20253c');g.addColorStop(1,'#101421');x.fillStyle=g;x.fillRect(0,0,1200,675);
+  x.fillStyle=colors[winnerIndex];x.fillRect(0,0,22,675);
+  x.fillStyle='#f8f9ff';x.font='800 58px system-ui';x.fillText('ROUE 2TNX',70,95);
+  x.fillStyle='#aeb6d2';x.font='32px system-ui';x.fillText('La roue a parlé…',70,155);
+  x.save();x.beginPath();x.arc(325,380,175,0,Math.PI*2);x.clip();x.drawImage(imgs[winnerIndex],150,205,350,350);x.restore();
+  x.strokeStyle='#ffffff';x.lineWidth=12;x.beginPath();x.arc(325,380,175,0,Math.PI*2);x.stroke();
+  x.fillStyle='#ffd45c';x.font='900 56px system-ui';x.fillText(names[winnerIndex],570,330);
+  x.fillStyle='#ffffff';x.font='700 34px system-ui';x.fillText('a été sélectionné(e)',570,385);
+  x.fillStyle='#aeb6d2';x.font='26px system-ui';x.fillText(new Date().toLocaleString('fr-FR'),570,445);
+  return c;
+}
+async function shareResult(){
+  if(winnerIndex===null)return;
+  const c=makeWinnerCard();
+  const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+  const file=new File([blob],'resultat-roue-2TNX.png',{type:'image/png'});
+  if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+    try{await navigator.share({title:'Roue 2TNX',text:discordText(),files:[file]});return}catch(e){}
+  }
+  await copyResult();
+  showToast('Partage direct indisponible : message copié.');
+}
+async function downloadWinnerImage(){
+  if(winnerIndex===null)return;
+  const c=makeWinnerCard();const a=document.createElement('a');a.download=`Roue-2TNX-${names[winnerIndex].replace(/[^\w-]+/g,'_')}.png`;a.href=c.toDataURL('image/png');a.click();showToast('Image du gagnant créée.');
+}
+function buildPlayers(){
+  playersEl.innerHTML='';
+  for(let i=0;i<N;i++){
+    const row=document.createElement('div');row.className='player';
+    const im=document.createElement('img');im.src=`assets/avatar_${i+1}.png`;
+    const inp=document.createElement('input');inp.type='text';inp.maxLength=80;inp.value=names[i];inp.setAttribute('aria-label',`Nom du personnage ${i+1}`);
+    const chk=document.createElement('input');chk.type='checkbox';chk.className='active';chk.checked=active[i];chk.title='Actif dans la roue';
+    inp.addEventListener('input',()=>{names[i]=inp.value.trim()||defaults[i];save();renderHistory();if(winnerIndex===i)winnerText.textContent=`La roue a choisi : ${names[i]}`});
+    chk.addEventListener('change',()=>{active[i]=chk.checked;save();drawWheel()});
+    row.append(im,inp,chk);playersEl.appendChild(row);
+  }
+}
+function renderHistory(){
+  historyList.innerHTML='';
+  if(history.length===0){historyList.innerHTML='<div class="empty">Aucun tirage pour le moment.</div>';return}
+  history.forEach((h,n)=>{
+    const row=document.createElement('div');row.className='history-item';
+    const im=document.createElement('img');im.src=`assets/avatar_${h.i+1}.png`;
+    const mid=document.createElement('div');const name=document.createElement('div');name.textContent=h.name;name.style.fontWeight='800';
+    const sm=document.createElement('small');sm.textContent=new Date(h.ts).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'});mid.append(name,sm);
+    const b=document.createElement('span');b.className='badge';b.textContent=`#${history.length-n}`;
+    row.append(im,mid,b);historyList.appendChild(row);
+  });
+}
+document.getElementById('allBtn').addEventListener('click',()=>{active=Array(N).fill(true);save();buildPlayers();drawWheel();showToast('Tous les personnages sont actifs.')});
+document.getElementById('resetNamesBtn').addEventListener('click',()=>{names=defaults.slice();save();buildPlayers();showToast('Noms réinitialisés.')});
+document.getElementById('clearHistory').addEventListener('click',()=>{history=[];save();renderHistory();showToast('Historique effacé.')});
+document.getElementById('fullscreenBtn').addEventListener('click',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()});
+spinBtn.addEventListener('click',spin);copyBtn.addEventListener('click',copyResult);shareBtn.addEventListener('click',shareResult);imageBtn.addEventListener('click',downloadWinnerImage);
+
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='inline-block'});
+document.getElementById('installBtn').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById('installBtn').style.display='none'});
+
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+buildPlayers();renderHistory();loadImages().then(drawWheel);
+</script>
+</body>
+</html>
